@@ -1,0 +1,7 @@
+Love, 1, l
+Angel, 1, a
+Lady Miss, 1, w
+Carlos Magician, 1, q
+C++ guide, 1, c
+LLK JS, 1, q
+DDF A++, 1, a
