@@ -172,7 +172,6 @@ void exportBooksToFile(const std::string &file_path, auto &storage) {
     std::cout << "Books exported to file: " << file_path << "\n";
 }
 
-
 void addBook(auto &storage) {
     std::string title, genre;
     int author_id;
@@ -192,6 +191,7 @@ void addBook(auto &storage) {
 }
 
 void updateBook(auto &storage) {
+    try{
     int book_id;
     std::cout << "Enter book ID: ";
     std::cin >> book_id;
@@ -237,8 +237,10 @@ void updateBook(auto &storage) {
     storage.update(*book);
 
     std::cout << "Book updated successfully!\n";
+    }catch (const std::exception &e) {
+        std::cerr << "Custom Error: " << e.what() << '\n';
+    }
 }
-
 
 void listBooks(auto &storage) {
     auto books = storage.template get_all<Book>();
@@ -277,8 +279,6 @@ void listBooks(auto &storage) {
     }
 }
 
-
-
 void addAuthor(auto &storage) {
     std::string name;
     std::cout << "Enter author name: ";
@@ -314,6 +314,9 @@ void listBorrowers(auto &storage) {
 }
 
 void borrowBook(auto &storage) {
+    try {
+
+
     int book_id, borrower_id;
     std::cout << "Enter book ID: ";
     std::cin >> book_id;
@@ -365,9 +368,14 @@ void borrowBook(auto &storage) {
     storage.update(book);
 
     std::cout << "Book borrowed successfully.\n";
+    }catch (const std::exception &e) {
+        std::cerr << "Custom Error: " << e.what() << '\n';
+    }
 }
 
 void returnBook(auto &storage) {
+    try {
+
 
     auto all_records = storage.template get_all<BorrowRecord>();
     for (const BorrowRecord &record : all_records) {
@@ -377,21 +385,23 @@ void returnBook(auto &storage) {
             << ", Borrower ID: " << record.borrower_id << '\n';
     }
 
-
     int record_id;
     std::cout << "Enter borrow record ID: ";
     std::cin >> record_id;
 
-    auto record = storage.template get<BorrowRecord>(record_id);
+    BorrowRecord record = storage.template get<BorrowRecord>(record_id);
     auto book = storage.template get<Book>(record.book_id);
 
     auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
     record.return_date = std::ctime(&now);
     book.is_borrowed = false;
 
-    storage.update(record);
+    storage.template remove<BorrowRecord>(record.id);
     storage.update(book);
     std::cout << "Book returned successfully.\n";
+    }catch (const std::exception &e) {
+        std::cerr << "Custom Error: " << e.what() << '\n';
+    }
 }
 
 void menu() {
@@ -414,6 +424,8 @@ int main() {
     try {
         storage.sync_schema();
         std::cout << "Database schema created successfully.\n";
+        std::cout << "To use this application first create authors and then start adding books" << std::endl;
+        std::cout << "Register Borrowers to use borrow and return features"<<std::endl;
     } catch (const std::exception &e) {
         std::cerr << "Custom Error: " << e.what() << '\n';
     }
