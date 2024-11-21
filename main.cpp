@@ -316,7 +316,6 @@ void listBorrowers(auto &storage) {
 void borrowBook(auto &storage) {
     try {
 
-
     int book_id, borrower_id;
     std::cout << "Enter book ID: ";
     std::cin >> book_id;
@@ -391,11 +390,7 @@ void returnBook(auto &storage) {
 
     BorrowRecord record = storage.template get<BorrowRecord>(record_id);
     auto book = storage.template get<Book>(record.book_id);
-
-    auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-    record.return_date = std::ctime(&now);
     book.is_borrowed = false;
-
     storage.template remove<BorrowRecord>(record.id);
     storage.update(book);
     std::cout << "Book returned successfully.\n";
