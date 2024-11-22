@@ -41,29 +41,29 @@ auto createStorage() {
     using namespace sqlite_orm;
 
     return make_storage("library.sqlite",
-        make_table("books",
-            make_column("id", &Book::id, primary_key().autoincrement()),
-            make_column("title", &Book::title),
-            make_column("author_id", &Book::author_id),
-            make_column("genre", &Book::genre),
-            make_column("is_borrowed", &Book::is_borrowed)),
-        make_table("authors",
-            make_column("id", &Author::id, primary_key().autoincrement()),
-            make_column("name", &Author::name)),
-        make_table("borrowers",
-            make_column("id", &Borrower::id, primary_key().autoincrement()),
-            make_column("name", &Borrower::name),
-            make_column("email", &Borrower::email)),
-        make_table("borrow_records",
-            make_column("id", &BorrowRecord::id, primary_key().autoincrement()),
-            make_column("book_id", &BorrowRecord::book_id),
-            make_column("borrower_id", &BorrowRecord::borrower_id),
-            make_column("borrow_date", &BorrowRecord::borrow_date),
-            make_column("return_date", &BorrowRecord::return_date)));
+                        make_table("books",
+                                   make_column("id", &Book::id, primary_key().autoincrement()),
+                                   make_column("title", &Book::title),
+                                   make_column("author_id", &Book::author_id),
+                                   make_column("genre", &Book::genre),
+                                   make_column("is_borrowed", &Book::is_borrowed)),
+                        make_table("authors",
+                                   make_column("id", &Author::id, primary_key().autoincrement()),
+                                   make_column("name", &Author::name)),
+                        make_table("borrowers",
+                                   make_column("id", &Borrower::id, primary_key().autoincrement()),
+                                   make_column("name", &Borrower::name),
+                                   make_column("email", &Borrower::email)),
+                        make_table("borrow_records",
+                                   make_column("id", &BorrowRecord::id, primary_key().autoincrement()),
+                                   make_column("book_id", &BorrowRecord::book_id),
+                                   make_column("borrower_id", &BorrowRecord::borrower_id),
+                                   make_column("borrow_date", &BorrowRecord::borrow_date),
+                                   make_column("return_date", &BorrowRecord::return_date)));
 }
 
 
-void createTestData(auto& storage) {
+void createTestData(auto &storage) {
     // Add authors
     storage.replace(Author{-1, "J.K. Rowling"});
     storage.replace(Author{-1, "George Orwell"});
@@ -127,7 +127,7 @@ void exportBooksToFile(const std::string &file_path, auto &storage) {
     auto books = storage.template get_all<Book>();
     file << "book_id,book_name,author_name,borrowed/available,borrow_date,return_date,borrower_name\n";
 
-    for (const Book &book : books) {
+    for (const Book &book: books) {
         // Fetch author information
         std::optional<Author> author = storage.template get_optional<Author>(book.author_id);
         std::string author_name = author ? author->name : "Unknown";
@@ -147,25 +147,26 @@ void exportBooksToFile(const std::string &file_path, auto &storage) {
                 return_date = borrower_data->return_date.value_or("N/A");
 
                 // Fetch borrower details
-                std::optional<Borrower> borrower_details = storage.template get_optional<Borrower>(borrower_data->borrower_id);
+                std::optional<Borrower> borrower_details = storage.template get_optional<Borrower>(
+                    borrower_data->borrower_id);
                 borrower_name = borrower_details ? borrower_details->name : "Unknown";
             }
         }
-        std:: cout << book.id << ","
-             << book.title << ","
-             << author_name << ","
-             << status << ","
-             << borrow_date << ","
-             << return_date << ","
-             << borrower_name << "\n";
+        std::cout << book.id << ","
+                << book.title << ","
+                << author_name << ","
+                << status << ","
+                << borrow_date << ","
+                << return_date << ","
+                << borrower_name << "\n";
         // Write to file
         file << book.id << ","
-             << book.title << ","
-             << author_name << ","
-             << status << ","
-             << borrow_date << ","
-             << return_date << ","
-             << borrower_name << "\n";
+                << book.title << ","
+                << author_name << ","
+                << status << ","
+                << borrow_date << ","
+                << return_date << ","
+                << borrower_name << "\n";
     }
 
     file.close();
@@ -191,60 +192,60 @@ void addBook(auto &storage) {
 }
 
 void updateBook(auto &storage) {
-    try{
-    int book_id;
-    std::cout << "Enter book ID: ";
-    std::cin >> book_id;
-    std::cin.ignore(); // Clear the input buffer
+    try {
+        int book_id;
+        std::cout << "Enter book ID: ";
+        std::cin >> book_id;
+        std::cin.ignore(); // Clear the input buffer
 
-    // Find the book by ID
-    auto book = storage.template get_optional<Book>(book_id);
-    if (!book) {
-        std::cout << "Book with ID " << book_id << " not found.\n";
-        return;
-    }
+        // Find the book by ID
+        auto book = storage.template get_optional<Book>(book_id);
+        if (!book) {
+            std::cout << "Book with ID " << book_id << " not found.\n";
+            return;
+        }
 
-    // Display current book details
-    std::cout << "Book Found > ID: " << book->id
-              << ", Title: " << book->title
-              << ", Author ID: " << book->author_id
-              << ", Genre: " << book->genre << "\n";
+        // Display current book details
+        std::cout << "Book Found > ID: " << book->id
+                << ", Title: " << book->title
+                << ", Author ID: " << book->author_id
+                << ", Genre: " << book->genre << "\n";
 
-    // Get updated details from the user
-    std::string new_title, new_genre;
-    int new_author_id;
+        // Get updated details from the user
+        std::string new_title, new_genre;
+        int new_author_id;
 
-    std::cout << "Enter new book title (leave blank to keep current): ";
-    std::getline(std::cin, new_title);
-    if (!new_title.empty()) {
-        book->title = new_title;
-    }
+        std::cout << "Enter new book title (leave blank to keep current): ";
+        std::getline(std::cin, new_title);
+        if (!new_title.empty()) {
+            book->title = new_title;
+        }
 
-    std::cout << "Enter new author ID (or -1 to keep current): ";
-    std::cin >> new_author_id;
-    std::cin.ignore(); // Clear the input buffer
-    if (new_author_id != -1) {
-        book->author_id = new_author_id;
-    }
+        std::cout << "Enter new author ID (or -1 to keep current): ";
+        std::cin >> new_author_id;
+        std::cin.ignore(); // Clear the input buffer
+        if (new_author_id != -1) {
+            book->author_id = new_author_id;
+        }
 
-    std::cout << "Enter new genre (leave blank to keep current): ";
-    std::getline(std::cin, new_genre);
-    if (!new_genre.empty()) {
-        book->genre = new_genre;
-    }
+        std::cout << "Enter new genre (leave blank to keep current): ";
+        std::getline(std::cin, new_genre);
+        if (!new_genre.empty()) {
+            book->genre = new_genre;
+        }
 
-    // Update the book in the database
-    storage.update(*book);
+        // Update the book in the database
+        storage.update(*book);
 
-    std::cout << "Book updated successfully!\n";
-    }catch (const std::exception &e) {
+        std::cout << "Book updated successfully!\n";
+    } catch (const std::exception &e) {
         std::cerr << "Custom Error: " << e.what() << '\n';
     }
 }
 
 void listBooks(auto &storage) {
     auto books = storage.template get_all<Book>();
-    for (const auto &book : books) {
+    for (const auto &book: books) {
         std::optional<Author> author;
         try {
             author = storage.template get<Author>(book.author_id);
@@ -253,10 +254,10 @@ void listBooks(auto &storage) {
         }
 
         std::cout << "ID: " << book.id
-                  << ", Title: " << book.title
-                  << ", Author: " << (author ? author->name : "Unknown")
-                  << ", Genre: " << book.genre
-                  << ", Borrowed: " << (book.is_borrowed ? "Yes" : "No");
+                << ", Title: " << book.title
+                << ", Author: " << (author ? author->name : "Unknown")
+                << ", Genre: " << book.genre
+                << ", Borrowed: " << (book.is_borrowed ? "Yes" : "No");
 
         if (book.is_borrowed) {
             try {
@@ -267,11 +268,11 @@ void listBooks(auto &storage) {
                 auto borrower = storage.template get<Borrower>(borrow_record.borrower_id);
 
                 std::cout << "\n  Borrower Name: " << borrower.name
-                          << "\n  Borrow Date: " << borrow_record.borrow_date.value_or("Unknown")
-                          << "\n  Return Date: " << borrow_record.return_date.value_or("Unknown");
+                        << "\n  Borrow Date: " << borrow_record.borrow_date.value_or("Unknown")
+                        << "\n  Return Date: " << borrow_record.return_date.value_or("Unknown");
             } catch (const std::system_error &e) {
                 std::cerr << "\n  Warning: Borrow record or borrower details for book ID "
-                          << book.id << " not found.\n";
+                        << book.id << " not found.\n";
             }
         }
 
@@ -289,7 +290,7 @@ void addAuthor(auto &storage) {
 
 void listAuthors(auto &storage) {
     auto authors = storage.template get_all<Author>();
-    for (const auto &author : authors) {
+    for (const auto &author: authors) {
         std::cout << "ID: " << author.id << ", Name: " << author.name << '\n';
     }
 }
@@ -307,94 +308,106 @@ void registerBorrower(auto &storage) {
 
 void listBorrowers(auto &storage) {
     auto borrowers = storage.template get_all<Borrower>();
-    for (const auto &borrower : borrowers) {
+    for (const auto &borrower: borrowers) {
         std::cout << "ID: " << borrower.id << ", Name: " << borrower.name
-                  << ", Email: " << borrower.email << '\n';
+                << ", Email: " << borrower.email << '\n';
     }
 }
 
 void borrowBook(auto &storage) {
     try {
+        int book_id, borrower_id;
+        std::cout << "Enter book ID: ";
+        std::cin >> book_id;
 
-    int book_id, borrower_id;
-    std::cout << "Enter book ID: ";
-    std::cin >> book_id;
+        auto book = storage.template get<Book>(book_id);
+        if (book.is_borrowed) {
+            std::cout << "Book is already borrowed.\n";
+            return;
+        }
 
-    auto book = storage.template get<Book>(book_id);
-    if (book.is_borrowed) {
-        std::cout << "Book is already borrowed.\n";
-        return;
-    }
+        std::cout << "Enter borrower ID: ";
+        std::cin >> borrower_id;
 
-    std::cout << "Enter borrower ID: ";
-    std::cin >> borrower_id;
-
-    // Get current date
-    auto now = std::chrono::system_clock::now();
-    auto time_t_now = std::chrono::system_clock::to_time_t(now);
-    std::tm local_time;
+        // Get current date
+        auto now = std::chrono::system_clock::now();
+        auto time_t_now = std::chrono::system_clock::to_time_t(now);
+        std::tm local_time;
 #ifdef _WIN32
-    localtime_s(&local_time, &time_t_now);
+        localtime_s(&local_time, &time_t_now);
 #else
     localtime_r(&time_t_now, &local_time);
 #endif
 
-    // Format current date as DD-MM-YYYY
-    std::ostringstream current_date_stream;
-    current_date_stream << std::put_time(&local_time, "%d-%m-%Y");
-    std::string current_date = current_date_stream.str();
+        // Format current date as DD-MM-YYYY
+        std::ostringstream current_date_stream;
+        current_date_stream << std::put_time(&local_time, "%d-%m-%Y");
+        std::string current_date = current_date_stream.str();
 
-    // Display the current date to the user
-    std::cout << "Today's date: " << current_date << "\n";
+        // Display the current date to the user
+        std::cout << "Today's date: " << current_date << "\n";
 
-    // Prompt the user for the return date
-    std::cout << "Enter return date (dd-mm-yyyy): ";
-    std::string return_date;
-    std::cin >> return_date;
+        // Prompt the user for the return date
+        std::cout << "Enter return date (dd-mm-yyyy): ";
+        std::string return_date;
+        std::cin >> return_date;
 
-    // Validate the return date format
-    std::regex date_regex(R"(^\d{2}-\d{2}-\d{4}$)");
-    if (!std::regex_match(return_date, date_regex)) {
-        std::cout << "Invalid date format. Please enter the date in dd-mm-yyyy format.\n";
-        return;
-    }
+        // Validate the return date format
+        std::regex date_regex(R"(^\d{2}-\d{2}-\d{4}$)");
+        if (!std::regex_match(return_date, date_regex)) {
+            std::cout << "Invalid date format. Please enter the date in dd-mm-yyyy format.\n";
+            return;
+        }
 
-    // Insert borrow record into the database
-    storage.insert(BorrowRecord{-1, book_id, borrower_id, current_date, return_date});
+        // Insert borrow record into the database
+        storage.insert(BorrowRecord{-1, book_id, borrower_id, current_date, return_date});
 
-    // Mark the book as borrowed and update the database
-    book.is_borrowed = true;
-    storage.update(book);
+        // Mark the book as borrowed and update the database
+        book.is_borrowed = true;
+        storage.update(book);
 
-    std::cout << "Book borrowed successfully.\n";
-    }catch (const std::exception &e) {
+        std::cout << "Book borrowed successfully.\n";
+    } catch (const std::exception &e) {
         std::cerr << "Custom Error: " << e.what() << '\n';
     }
 }
 
 void returnBook(auto &storage) {
     try {
+        auto all_records = storage.template get_all<BorrowRecord>();
+        for (const BorrowRecord &record: all_records) {
+            std::cout << "ID: " << record.id << ", Name: " << record.book_id
+                    << ", Date: " << record.borrow_date.value_or("Unknown")
+                    << "\n  Return Date: " << record.return_date.value_or("Unknown")
+                    << ", Borrower ID: " << record.borrower_id << '\n';
+        }
 
+        int record_id;
+        std::cout << "Enter borrow record ID: ";
+        std::cin >> record_id;
 
-    auto all_records = storage.template get_all<BorrowRecord>();
-    for (const BorrowRecord &record : all_records) {
-        std::cout << "ID: " << record.id << ", Name: " << record.book_id
-            << ", Date: " << record.borrow_date.value_or("Unknown")
-            << "\n  Return Date: " << record.return_date.value_or("Unknown")
-            << ", Borrower ID: " << record.borrower_id << '\n';
+        BorrowRecord record = storage.template get<BorrowRecord>(record_id);
+        auto book = storage.template get<Book>(record.book_id);
+        book.is_borrowed = false;
+        storage.template remove<BorrowRecord>(record.id);
+        storage.update(book);
+        std::cout << "Book returned successfully.\n";
+    } catch (const std::exception &e) {
+        std::cerr << "Custom Error: " << e.what() << '\n';
     }
+}
 
-    int record_id;
-    std::cout << "Enter borrow record ID: ";
-    std::cin >> record_id;
-
-    BorrowRecord record = storage.template get<BorrowRecord>(record_id);
-    auto book = storage.template get<Book>(record.book_id);
-    book.is_borrowed = false;
-    storage.template remove<BorrowRecord>(record.id);
-    storage.update(book);
-    std::cout << "Book returned successfully.\n";
-    }catch (const std::exception &e) {
+void removeBook(auto &storage) {
+    // List all books
+    try {
+        listBooks(&storage);
+        std::cout << "Enter book ID: ";
+        int book_id;
+        std::cin >> book_id;
+        auto book = storage.template get<Book>(book_id);
+        storage.template remove<Book>(book_id);
+        std::cout << "Book deleted successfully.\n";
+    } catch (const std::exception &e) {
         std::cerr << "Custom Error: " << e.what() << '\n';
     }
 }
@@ -402,16 +415,17 @@ void returnBook(auto &storage) {
 void menu() {
     std::cout << "Library Management System\n";
     std::cout << "1. Add Book\n";
-    std::cout << "2. List Books\n";
-    std::cout << "3. Add Author\n";
-    std::cout << "4. List Authors\n";
-    std::cout << "5. Register Borrower\n";
-    std::cout << "6. List Borrowers\n";
-    std::cout << "7. Borrow Book\n";
-    std::cout << "8. Return Book\n";
-    std::cout << "9. Update Book\n";
-    std::cout << "10. Import Books\n";
-    std::cout << "11. Export Books\n";
+    std::cout << "2. Remove Book\n";
+    std::cout << "3. List Books\n";
+    std::cout << "4. Update Book\n";
+    std::cout << "5. Add Author\n";
+    std::cout << "6. List Authors\n";
+    std::cout << "7. Register Borrower\n";
+    std::cout << "8. List Borrowers\n";
+    std::cout << "9. Borrow Book\n";
+    std::cout << "10. Return Book\n";
+    std::cout << "11. Import Books\n";
+    std::cout << "12. Export Books\n";
 }
 
 int main() {
@@ -420,7 +434,7 @@ int main() {
         storage.sync_schema();
         std::cout << "Database schema created successfully.\n";
         std::cout << "To use this application first create authors and then start adding books" << std::endl;
-        std::cout << "Register Borrowers to use borrow and return features"<<std::endl;
+        std::cout << "Register Borrowers to use borrow and return features" << std::endl;
     } catch (const std::exception &e) {
         std::cerr << "Custom Error: " << e.what() << '\n';
     }
@@ -435,19 +449,49 @@ int main() {
         std::cin.ignore();
 
         switch (choice) {
-            case 1: addBook(storage); break;
-            case 2: listBooks(storage); break;
-            case 3: addAuthor(storage); break;
-            case 4: listAuthors(storage); break;
-            case 5: registerBorrower(storage); break;
-            case 6: listBorrowers(storage); break;
-            case 7: borrowBook(storage); break;
-            case 8: returnBook(storage); break;
-            case 9 : updateBook(storage); break;
-            case 10: importBooksFromFile("C:/Users/mrbil/CLionProjects/librarymanagement/books.txt",storage); break;
-            case 11: exportBooksToFile("export_book.txt",storage); break;
-            case 12: return 0;
-            default: std::cout << "Invalid choice.\n";
+            case 1:
+                addBook(storage);
+            break;
+            case 2:
+                removeBook(storage);
+            break;
+            case 3:
+                listBooks(storage);
+            break;
+            case 4:
+                updateBook(storage);
+            break;
+            case 5:
+                addAuthor(storage);
+            break;
+            case 6:
+                listAuthors(storage);
+            break;
+            case 7:
+                registerBorrower(storage);
+            break;
+            case 8:
+                listBorrowers(storage);
+            break;
+            case 9:
+                borrowBook(storage);
+            break;
+            case 10:
+                returnBook(storage);
+            break;
+            case 11:
+                importBooksFromFile("C:/Users/mrbil/CLionProjects/librarymanagement/books.txt", storage);
+            break;
+            case 12:
+                exportBooksToFile("export_book.txt", storage);
+            break;
+            case 0:
+                std::cout << "Exiting the program. Goodbye!\n";
+            return 0;
+            default:
+                std::cout << "Invalid choice.\n";
+            break;
         }
+
     }
 }
