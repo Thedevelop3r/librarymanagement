@@ -349,7 +349,7 @@ void listAuthorsAndBooks(auto &storage) {
         } else {
             std::cout << "   Books:\n";
             for (const auto &book: booksByAuthor) {
-                std::cout << "      - " << book.title << '\n';
+                std::cout << "      - " << book.title << "   - Genre: " <<'\n';
             }
         }
     }
