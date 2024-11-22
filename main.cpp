@@ -452,7 +452,7 @@ void borrowBook(auto &storage) {
         // }
 
         // Insert borrow record into the database
-        storage.insert(BorrowRecord{-1, book_id, borrower_id, current_date, ""});
+        storage.insert(BorrowRecord{-1, book_id, borrower_id, current_date, {}});
 
         // Mark the book as borrowed and update the database
         book.is_borrowed = true;
@@ -466,37 +466,75 @@ void borrowBook(auto &storage) {
 
 void returnBook(auto &storage) {
     try {
+        // Fetch all books that are currently borrowed
         auto borrowed_books = storage.template get_all<Book>(
-            where(c(&Book::is_borrowed) == true) // Fetch books that are currently borrowed
+            where(c(&Book::is_borrowed) == true)
         );
 
-        for (const Book &book: borrowed_books) {
+        if (borrowed_books.empty()) {
+            std::cout << "No books are currently borrowed.\n";
+            return;
+        }
+
+        std::vector<std::pair<BorrowRecord, Book>> records_to_return;
+
+        // Collect all records of borrowed books
+        for (const Book &book : borrowed_books) {
             try {
-                // Fetch the latest borrow record for the book
-                auto borrow_record = storage.template get_all<BorrowRecord>(
-                    where(c(&BorrowRecord::book_id) == book.id),
-                    order_by(&BorrowRecord::borrow_date).desc(),
-                    limit(1)
+                auto borrow_records = storage.template get_all<BorrowRecord>(
+                    where(c(&BorrowRecord::book_id) == book.id)
                 );
 
-                if (!borrow_record.empty()) {
-                    const auto &record = borrow_record.front();
-
-                    // Fetch borrower details
-                    auto borrower = storage.template get<Borrower>(record.borrower_id);
-
-                    // Print book and borrower details
-                    std::cout << "Book ID: " << book.id << ", Title: " << book.title
-                            << "\n  Borrowed By: " << borrower.name
-                            << "\n  Borrow Date: " << record.borrow_date.value_or("Unknown")
-                            << "\n  Return Date: " << record.return_date.value_or("Unknown")
-                            << "\n  Borrower ID: " << borrower.id << "\n\n";
+                for (const auto &record : borrow_records) {
+                    if (!record.return_date.has_value()) { // Check for NULL return_date manually
+                        records_to_return.emplace_back(record, book);
+                    }
                 }
             } catch (const std::system_error &e) {
-                std::cerr << "\n  Warning: Details for book ID " << book.id << " not found.\n";
+                std::cerr << "Warning: No borrow record found for book ID " << book.id << ".\n";
             }
         }
-        // Get current date
+
+        if (records_to_return.empty()) {
+            std::cout << "No unreturned borrow records found.\n";
+            return;
+        }
+
+        // Display the list of unreturned borrow records
+        std::cout << "Borrow Records:\n";
+        for (const auto &[record, book] : records_to_return) {
+            try {
+                auto borrower = storage.template get<Borrower>(record.borrower_id);
+
+                std::cout << "Borrow ID: " << record.id
+                          << " | Book: " << book.title
+                          << " | Borrower: " << borrower.name
+                          << " | Borrow Date: " << record.borrow_date.value_or("Unknown") << "\n";
+            } catch (const std::system_error &e) {
+                std::cerr << "Warning: Borrower details not found for record ID " << record.id << ".\n";
+            }
+        }
+
+        // Prompt the user to select a borrow record to return
+        int borrow_id;
+        std::cout << "\nEnter the Borrow ID to mark as returned: ";
+        std::cin >> borrow_id;
+
+        // Find the selected borrow record
+        auto it = std::find_if(records_to_return.begin(), records_to_return.end(),
+                               [borrow_id](const std::pair<BorrowRecord, Book> &entry) {
+                                   return entry.first.id == borrow_id;
+                               });
+
+        if (it == records_to_return.end()) {
+            std::cerr << "Error: Invalid Borrow ID entered.\n";
+            return;
+        }
+
+        BorrowRecord record = it->first;
+        Book book = it->second;
+
+        // Get the current date in DD-MM-YYYY format
         auto now = std::chrono::system_clock::now();
         auto time_t_now = std::chrono::system_clock::to_time_t(now);
         std::tm local_time;
@@ -505,27 +543,26 @@ void returnBook(auto &storage) {
 #else
         localtime_r(&time_t_now, &local_time);
 #endif
-
-        // Format current date as DD-MM-YYYY
         std::ostringstream current_date_stream;
         current_date_stream << std::put_time(&local_time, "%d-%m-%Y");
         std::string current_date = current_date_stream.str();
 
-        int book_record_id;
-        std::cout << "Enter borrowed book ID: ";
-        std::cin >> book_record_id;
-
-        BorrowRecord record = storage.template get<BorrowRecord>(book_record_id);
+        // Update the borrow record with the return date
         record.return_date = current_date;
-        auto book = storage.template get<Book>(book_record_id);
+        storage.update(record);
+
+        // Mark the book as available
         book.is_borrowed = false;
         storage.update(book);
-        storage.update(record);
-        std::cout << "Book returned successfully.\n";
+
+        std::cout << "Book '" << book.title << "' has been successfully returned on " << current_date << ".\n";
+
     } catch (const std::exception &e) {
         std::cerr << "Custom Error: " << e.what() << '\n';
     }
 }
+
+
 
 void removeBook(auto &storage) {
     try {
@@ -552,6 +589,22 @@ void removeBook(auto &storage) {
     }
 }
 
+void showBorrowRecords(auto &storage) {
+    try {
+        auto borrow_records = storage.template get_all<BorrowRecord>();
+        for (const BorrowRecord &record : borrow_records) {
+            Book book = storage.template get<Book>(record.book_id);
+            Borrower borrower_profile = storage.template get<Borrower>(record.borrower_id);
+            std::cout << "Borrow ID: " << record.id << " || Book: " << book.title << " || Borrower Name: " <<
+                borrower_profile.name << " || Borrowed Date: " << record.borrow_date.value_or("Unknown") <<
+                    " || Return Date: " << record.return_date.value_or("N/A") << "\n";
+        }
+
+    } catch (std::exception &e) {
+        std::cerr << "Custom Error: " << e.what() << '\n';
+    }
+}
+
 
 void menu() {
     std::cout << "\n\nLibrary Management System\n";
@@ -564,9 +617,10 @@ void menu() {
     std::cout << "7. Register Borrower\n";
     std::cout << "8. List Borrowers\n";
     std::cout << "9. Borrow Book\n";
-    std::cout << "10. Return Book\n";
-    std::cout << "11. Import Books\n";
-    std::cout << "12. Export Books\n";
+    std::cout << "10. Borrow Records\n";
+    std::cout << "11. Return Book\n";
+    std::cout << "12. Import Books\n";
+    std::cout << "13. Export Books\n";
 }
 
 int main() {
@@ -619,12 +673,15 @@ int main() {
                 borrowBook(storage);
                 break;
             case 10:
+                showBorrowRecords(storage);
+            break;
+            case 11:
                 returnBook(storage);
                 break;
-            case 11:
+            case 12:
                 importBooksFromFile("C:/Users/mrbil/CLionProjects/librarymanagement/books.txt", storage);
                 break;
-            case 12:
+            case 13:
                 exportBooksToFile("export_book.txt", storage);
                 break;
             case 0:

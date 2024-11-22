@@ -1,4 +1,4 @@
 C:\Users\mrbil\AppData\Local\Programs\CLion\bin\cmake\win\x64\bin\cmake.exe -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=C:/Users/mrbil/AppData/Local/Programs/CLion/bin/ninja/win/x64/ninja.exe "-DCMAKE_TOOLCHAIN_FILE=C:\Users\mrbil\.vcpkg-clion\vcpkg (1)\scripts\buildsystems\vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-mingw-dynamic -G Ninja -S C:\Users\mrbil\CLionProjects\librarymanagement -B C:\Users\mrbil\CLionProjects\librarymanagement\cmake-build-debug
--- Configuring done (0.3s)
--- Generating done (0.0s)
+-- Configuring done (0.8s)
+-- Generating done (0.1s)
 -- Build files have been written to: C:/Users/mrbil/CLionProjects/librarymanagement/cmake-build-debug

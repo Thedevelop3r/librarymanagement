@@ -2,6 +2,6 @@ C:\Users\mrbil\AppData\Local\Programs\CLion\bin\cmake\win\x64\bin\cmake.exe -DCM
 -- find_package(SqliteOrm CONFIG REQUIRED)
 --   find_package(unofficial-sqlite3 REQUIRED)
 -- find_package(unofficial-sqlite3 CONFIG REQUIRED)
--- Configuring done (0.5s)
--- Generating done (0.0s)
+-- Configuring done (0.8s)
+-- Generating done (0.1s)
 -- Build files have been written to: C:/Users/mrbil/CLionProjects/librarymanagement/cmake-build-release
