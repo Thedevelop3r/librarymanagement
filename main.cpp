@@ -38,7 +38,6 @@ struct BorrowRecord {
     std::optional<std::string> return_date;
 };
 
-
 // prototypes
 auto createStorage();
 void createTestData(auto &storage);
