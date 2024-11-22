@@ -347,9 +347,9 @@ void listAuthorsAndBooks(auto &storage) {
         if (booksByAuthor.empty()) {
             std::cout << "   No books written by this author.\n";
         } else {
-            std::cout << "   Books:\n";
-            for (const auto &book: booksByAuthor) {
-                std::cout << "      - " << book.title << "   - Genre: " <<'\n';
+            std::cout << "Books:\n";
+            for (const Book &book: booksByAuthor) {
+                std::cout << "      - " << book.title << "   - Genre: " << book.genre <<'\n';
             }
         }
     }
@@ -437,22 +437,22 @@ void borrowBook(auto &storage) {
         std::string current_date = current_date_stream.str();
 
         // Display the current date to the user
-        std::cout << "Today's date: " << current_date << "\n";
+        // std::cout << "Today's date: " << current_date << "\n";
 
         // Prompt the user for the return date
-        std::cout << "Enter return date (dd-mm-yyyy): ";
-        std::string return_date;
-        std::cin >> return_date;
+        // std::cout << "Enter return date (dd-mm-yyyy): ";
+        // std::string return_date;
+        // std::cin >> return_date;
 
         // Validate the return date format
-        std::regex date_regex(R"(^\d{2}-\d{2}-\d{4}$)");
-        if (!std::regex_match(return_date, date_regex)) {
-            std::cout << "Invalid date format. Please enter the date in dd-mm-yyyy format.\n";
-            return;
-        }
+        // std::regex date_regex(R"(^\d{2}-\d{2}-\d{4}$)");
+        // if (!std::regex_match(return_date, date_regex)) {
+            // std::cout << "Invalid date format. Please enter the date in dd-mm-yyyy format.\n";
+            // return;
+        // }
 
         // Insert borrow record into the database
-        storage.insert(BorrowRecord{-1, book_id, borrower_id, current_date, return_date});
+        storage.insert(BorrowRecord{-1, book_id, borrower_id, current_date, ""});
 
         // Mark the book as borrowed and update the database
         book.is_borrowed = true;
@@ -496,15 +496,31 @@ void returnBook(auto &storage) {
                 std::cerr << "\n  Warning: Details for book ID " << book.id << " not found.\n";
             }
         }
+        // Get current date
+        auto now = std::chrono::system_clock::now();
+        auto time_t_now = std::chrono::system_clock::to_time_t(now);
+        std::tm local_time;
+#ifdef _WIN32
+        localtime_s(&local_time, &time_t_now);
+#else
+        localtime_r(&time_t_now, &local_time);
+#endif
+
+        // Format current date as DD-MM-YYYY
+        std::ostringstream current_date_stream;
+        current_date_stream << std::put_time(&local_time, "%d-%m-%Y");
+        std::string current_date = current_date_stream.str();
 
         int book_record_id;
         std::cout << "Enter borrowed book ID: ";
         std::cin >> book_record_id;
 
-        // BorrowRecord record = storage.template get<BorrowRecord>(book_record_id);
+        BorrowRecord record = storage.template get<BorrowRecord>(book_record_id);
+        record.return_date = current_date;
         auto book = storage.template get<Book>(book_record_id);
         book.is_borrowed = false;
         storage.update(book);
+        storage.update(record);
         std::cout << "Book returned successfully.\n";
     } catch (const std::exception &e) {
         std::cerr << "Custom Error: " << e.what() << '\n';
