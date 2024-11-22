@@ -8,6 +8,8 @@
 #include <ctime>
 #include <regex>
 
+using namespace sqlite_orm;
+
 // Entities
 struct Book {
     int id;
@@ -36,6 +38,24 @@ struct BorrowRecord {
     std::optional<std::string> return_date;
 };
 
+
+// prototypes
+auto createStorage();
+void createTestData(auto &storage);
+void importBooksFromFile(const std::string &file_path, auto &storage);
+void exportBooksToFile(const std::string &file_path, auto &storage);
+void addBook(auto &storage);
+void updateBook(auto &storage);
+void listBooks(auto &storage);
+void addAuthor(auto &storage);
+void listAuthorsAndBooks(auto &storage);
+void listAuthors(auto &storage);
+void registerBorrower(auto &storage);
+void listBorrowers(auto &storage);
+void borrowBook(auto &storage);
+void returnBook(auto &storage);
+void removeBook(auto &storage);
+
 // Storage setup
 auto createStorage() {
     using namespace sqlite_orm;
@@ -61,8 +81,6 @@ auto createStorage() {
                                    make_column("borrow_date", &BorrowRecord::borrow_date),
                                    make_column("return_date", &BorrowRecord::return_date)));
 }
-
-
 void createTestData(auto &storage) {
     // Add authors
     storage.replace(Author{-1, "J.K. Rowling"});
@@ -82,7 +100,6 @@ void createTestData(auto &storage) {
     storage.replace(BorrowRecord{-1, 1, 1, "2024-11-01", "2024-11-10"});
     storage.replace(BorrowRecord{-1, 2, 2, "2024-11-05", "2024-11-15"});
 }
-
 void importBooksFromFile(const std::string &file_path, auto &storage) {
     std::ifstream file(file_path);
     if (!file.is_open()) {
@@ -115,7 +132,6 @@ void importBooksFromFile(const std::string &file_path, auto &storage) {
     file.close();
     std::cout << "Finished importing books from file.\n";
 }
-
 void exportBooksToFile(const std::string &file_path, auto &storage) {
     std::ofstream file(file_path);
     if (!file.is_open()) {
@@ -172,14 +188,14 @@ void exportBooksToFile(const std::string &file_path, auto &storage) {
     file.close();
     std::cout << "Books exported to file: " << file_path << "\n";
 }
-
 void addBook(auto &storage) {
     std::string title, genre;
     int author_id;
 
     std::cout << "Enter book title: ";
     std::getline(std::cin, title);
-
+    // list authors
+    listAuthors(storage);
     std::cout << "Enter author ID: ";
     std::cin >> author_id;
 
@@ -190,7 +206,6 @@ void addBook(auto &storage) {
     storage.insert(Book{-1, title, author_id, genre, false});
     std::cout << "Book added successfully.\n";
 }
-
 void updateBook(auto &storage) {
     try {
         int book_id;
@@ -242,7 +257,6 @@ void updateBook(auto &storage) {
         std::cerr << "Custom Error: " << e.what() << '\n';
     }
 }
-
 void listBooks(auto &storage) {
     auto books = storage.template get_all<Book>();
     for (const auto &book: books) {
@@ -279,7 +293,6 @@ void listBooks(auto &storage) {
         std::cout << '\n';
     }
 }
-
 void addAuthor(auto &storage) {
     std::string name;
     std::cout << "Enter author name: ";
@@ -287,14 +300,29 @@ void addAuthor(auto &storage) {
     storage.insert(Author{-1, name});
     std::cout << "Author added successfully.\n";
 }
+void listAuthorsAndBooks(auto &storage) {
+    auto authors = storage.template get_all<Author>();
+    for (const auto &author : authors) {
+        std::cout << "ID: " << author.id << ", Name: " << author.name << '\n';
+        // Fetch books written by the author
+        auto booksByAuthor = storage.template get_all<Book>(where(c(&Book::author_id) == author.id));
 
+        if (booksByAuthor.empty()) {
+            std::cout << "   No books written by this author.\n";
+        } else {
+            std::cout << "   Books:\n";
+            for (const auto &book : booksByAuthor) {
+                std::cout << "      - " << book.title << '\n';
+            }
+        }
+    }
+}
 void listAuthors(auto &storage) {
     auto authors = storage.template get_all<Author>();
-    for (const auto &author: authors) {
+    for (const auto &author : authors) {
         std::cout << "ID: " << author.id << ", Name: " << author.name << '\n';
     }
 }
-
 void registerBorrower(auto &storage) {
     std::string name, email;
     std::cout << "Enter borrower name: ";
@@ -305,7 +333,6 @@ void registerBorrower(auto &storage) {
     storage.insert(Borrower{-1, name, email});
     std::cout << "Borrower registered successfully.\n";
 }
-
 void listBorrowers(auto &storage) {
     auto borrowers = storage.template get_all<Borrower>();
     for (const auto &borrower: borrowers) {
@@ -313,7 +340,6 @@ void listBorrowers(auto &storage) {
                 << ", Email: " << borrower.email << '\n';
     }
 }
-
 void borrowBook(auto &storage) {
     try {
         int book_id, borrower_id;
@@ -371,7 +397,6 @@ void borrowBook(auto &storage) {
         std::cerr << "Custom Error: " << e.what() << '\n';
     }
 }
-
 void returnBook(auto &storage) {
     try {
         auto all_records = storage.template get_all<BorrowRecord>();
@@ -396,11 +421,10 @@ void returnBook(auto &storage) {
         std::cerr << "Custom Error: " << e.what() << '\n';
     }
 }
-
 void removeBook(auto &storage) {
     // List all books
     try {
-        listBooks(&storage);
+        listBooks(storage);
         std::cout << "Enter book ID: ";
         int book_id;
         std::cin >> book_id;
@@ -413,7 +437,7 @@ void removeBook(auto &storage) {
 }
 
 void menu() {
-    std::cout << "Library Management System\n";
+    std::cout << "\n\nLibrary Management System\n";
     std::cout << "1. Add Book\n";
     std::cout << "2. Remove Book\n";
     std::cout << "3. List Books\n";
@@ -447,6 +471,7 @@ int main() {
         std::cout << "Enter choice: ";
         std::cin >> choice;
         std::cin.ignore();
+        std::cout << "\n---------\n";
 
         switch (choice) {
             case 1:
@@ -465,7 +490,7 @@ int main() {
                 addAuthor(storage);
             break;
             case 6:
-                listAuthors(storage);
+                listAuthorsAndBooks(storage);
             break;
             case 7:
                 registerBorrower(storage);
