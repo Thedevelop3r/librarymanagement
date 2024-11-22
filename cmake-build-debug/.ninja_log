@@ -1,0 +1,25 @@
+# ninja log v6
+26	21402	7540066562152533	CMakeFiles/librarymanagement.dir/main.cpp.obj	544e794a6c31fc9e
+21403	31744	7540066775915520	librarymanagement.exe	c508e193fc277f05
+76	20713	7540076788638526	CMakeFiles/librarymanagement.dir/main.cpp.obj	544e794a6c31fc9e
+20713	33163	7540076994979232	librarymanagement.exe	c508e193fc277f05
+46	18975	7540078601644469	CMakeFiles/librarymanagement.dir/main.cpp.obj	544e794a6c31fc9e
+18979	28996	7540078790977932	librarymanagement.exe	c508e193fc277f05
+24	15014	7540079627174681	CMakeFiles/librarymanagement.dir/main.cpp.obj	544e794a6c31fc9e
+15018	30400	7540079777124555	librarymanagement.exe	c508e193fc277f05
+10	17400	7540085641400118	CMakeFiles/librarymanagement.dir/main.cpp.obj	544e794a6c31fc9e
+17400	28131	7540085815301571	librarymanagement.exe	c508e193fc277f05
+10	14735	7540091037120006	CMakeFiles/librarymanagement.dir/main.cpp.obj	544e794a6c31fc9e
+14736	26162	7540091184378740	librarymanagement.exe	c508e193fc277f05
+21	16306	7540093610937099	CMakeFiles/librarymanagement.dir/main.cpp.obj	544e794a6c31fc9e
+16310	26669	7540093773812311	librarymanagement.exe	c508e193fc277f05
+33	16093	7540103194666369	CMakeFiles/librarymanagement.dir/main.cpp.obj	544e794a6c31fc9e
+16097	26253	7540103355300013	librarymanagement.exe	c508e193fc277f05
+27	17514	7540111986920061	CMakeFiles/librarymanagement.dir/main.cpp.obj	544e794a6c31fc9e
+17520	28317	7540112161845277	librarymanagement.exe	c508e193fc277f05
+23	14325	7540119603239112	CMakeFiles/librarymanagement.dir/main.cpp.obj	544e794a6c31fc9e
+14326	26154	7540119746270459	librarymanagement.exe	c508e193fc277f05
+12	14361	7540126537277413	CMakeFiles/librarymanagement.dir/main.cpp.obj	544e794a6c31fc9e
+14361	25329	7540126680765720	librarymanagement.exe	c508e193fc277f05
+10	12413	7540132380561121	CMakeFiles/librarymanagement.dir/main.cpp.obj	544e794a6c31fc9e
+12417	22156	7540132504641804	librarymanagement.exe	c508e193fc277f05

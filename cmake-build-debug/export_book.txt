@@ -1,0 +1,12 @@
+book_id,book_name,author_name,borrowed/available,borrow_date,return_date,borrower_name
+1,Love,jhon,borrowed,Thu Nov 21 21:38:12 2024
+,Thu Nov 21 21:46:03 2024
+,Unknown
+2,Angel,jhon,borrowed,Thu Nov 21 21:38:24 2024
+,Thu Nov 21 21:38:34 2024
+,Unknown
+3,Lady Miss,jhon,available,N/A,N/A,N/A
+4,Carlos Magician,jhon,available,N/A,N/A,N/A
+5,C++ guide,jhon,available,N/A,N/A,N/A
+6,LLK JS,jhon,available,N/A,N/A,N/A
+7,DDF A++,jhon,available,N/A,N/A,N/A
