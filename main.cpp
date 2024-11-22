@@ -335,9 +335,26 @@ void registerBorrower(auto &storage) {
 }
 void listBorrowers(auto &storage) {
     auto borrowers = storage.template get_all<Borrower>();
-    for (const auto &borrower: borrowers) {
-        std::cout << "ID: " << borrower.id << ", Name: " << borrower.name
-                << ", Email: " << borrower.email << '\n';
+    for (const Borrower &borrower : borrowers) {
+        // Display borrower details
+        std::cout << "ID: " << borrower.id
+                  << ", Name: " << borrower.name
+                  << ", Email: " << borrower.email << '\n';
+
+        // Retrieve borrow records for this borrower
+        auto borrowed_books = storage.template get_all<BorrowRecord>(
+            sqlite_orm::where(sqlite_orm::c(&BorrowRecord::borrower_id) == borrower.id)
+        );
+
+        // Display books borrowed by the borrower
+        if (borrowed_books.empty()) {
+            std::cout << "  No books borrowed.\n";
+        } else {
+            for (const BorrowRecord &borrowRecord : borrowed_books) {
+                auto book = storage.template get<Book>(borrowRecord.book_id);
+                std::cout << "  Book Borrowed: " << book.title << '\n';
+            }
+        }
     }
 }
 void borrowBook(auto &storage) {
@@ -414,7 +431,7 @@ void returnBook(auto &storage) {
         BorrowRecord record = storage.template get<BorrowRecord>(record_id);
         auto book = storage.template get<Book>(record.book_id);
         book.is_borrowed = false;
-        storage.template remove<BorrowRecord>(record.id);
+        //storage.template remove<BorrowRecord>(record.id);
         storage.update(book);
         std::cout << "Book returned successfully.\n";
     } catch (const std::exception &e) {
@@ -517,6 +534,9 @@ int main() {
                 std::cout << "Invalid choice.\n";
             break;
         }
+        std::string empty_line = "---------";
+        std:: cout << "\nPress enter to continue:";
+        std::getline(std::cin, empty_line);
 
     }
 }
