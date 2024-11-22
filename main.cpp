@@ -42,8 +42,6 @@ struct BorrowRecord {
 // prototypes
 auto createStorage();
 void createTestData(auto &storage);
-void importBooksFromFile(const std::string &file_path, auto &storage);
-void exportBooksToFile(const std::string &file_path, auto &storage);
 void addBook(auto &storage);
 void updateBook(auto &storage);
 void listBooks(auto &storage);
@@ -553,7 +551,6 @@ void showMain() {
     std::cout << "2. Manage Authors\n";
     std::cout << "3. Manage Borrowers\n";
     std::cout << "4. Borrow and Return Books\n";
-    std::cout << "5. Import/Export Books\n";
     std::cout << "0. Exit\n";
 }
 
